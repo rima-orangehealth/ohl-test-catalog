@@ -1,0 +1,31 @@
+name: Refresh catalog data
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'   # every 4 hours automatically
+  workflow_dispatch:          # manual trigger anytime
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch latest data from Google Sheets
+        run: |
+          curl -fsSL \
+            "https://docs.google.com/spreadsheets/d/1FPI-QWoy3x6eATQDkDkoJ_EqW8E7MOTil4PTAT9ZQbM/export?format=csv&gid=0" \
+            -o data.csv
+          echo "Fetched $(wc -l < data.csv) rows"
+
+      - name: Commit if data changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.csv
+          git diff --staged --quiet \
+            && echo "No changes to data.csv" \
+            || (git commit -m "chore: refresh catalog data from Google Sheets" && git push)
