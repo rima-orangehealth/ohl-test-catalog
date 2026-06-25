@@ -230,8 +230,7 @@ main{max-width:1200px;margin:0 auto;padding:20px 24px 60px}
 <button class="scroll-top" id="scrollTop">↑</button>
 
 <script>
-const SHEET_ID = '1FPI-QWoy3x6eATQDkDkoJ_EqW8E7MOTil4PTAT9ZQbM';
-const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+const CSV_URL = './data.csv';
 const KNOWN_CITIES = new Set(['Bangalore','Delhi','Noida','Hyderabad','Mumbai']);
 const CITY_CLASS = {Bangalore:'blr',Delhi:'del',Noida:'noi',Hyderabad:'hyd',Mumbai:'mum'};
 
@@ -346,8 +345,8 @@ function processRows(rows) {
 
 // ── FETCH ─────────────────────────────────────────────────────────────────
 async function loadData() {
-  const resp = await fetch(CSV_URL);
-  if (!resp.ok) throw new Error(`Google Sheets returned ${resp.status}. Make sure the sheet is shared as "Anyone with the link can view".`);
+  const resp = await fetch(CSV_URL + '?v=' + Date.now());
+  if (!resp.ok) throw new Error(`Could not load data (${resp.status}). The catalog data may still be generating — wait 1 minute and try again.`);
   const text = await resp.text();
   const rows = parseCSV(text);
   return processRows(rows);
